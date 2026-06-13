@@ -1,3 +1,7 @@
+import threading
+import urllib.request
+import time
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -6,7 +10,7 @@ import joblib, json, numpy as np, pandas as pd
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # temporarily allow everything to test
+    allow_origins=["*"],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -16,10 +20,26 @@ scaler    = joblib.load("delivery_scaler.pkl")
 model     = joblib.load("delivery_model.pkl")
 feat_cols = json.load(open("feature_columns.json"))
 
-WEATHER_MAP     = {"Windy":0, "Clear":1, "Foggy":2, "Rainy":3, "Snowy":4}
-TRAFFIC_MAP     = {"Low":0, "Medium":1, "High":2, "Unknown":3}
-TIME_MAP        = {"Afternoon":0, "Evening":1, "Morning":2, "Night":3, "Unknown":4}
-VEHICLE_MAP     = {"Scooter":0, "Bike":1, "Car":2}
+WEATHER_MAP  = {"Windy":0, "Clear":1, "Foggy":2, "Rainy":3, "Snowy":4}
+TRAFFIC_MAP  = {"Low":0, "Medium":1, "High":2, "Unknown":3}
+TIME_MAP     = {"Afternoon":0, "Evening":1, "Morning":2, "Night":3, "Unknown":4}
+VEHICLE_MAP  = {"Scooter":0, "Bike":1, "Car":2}
+
+
+# ── Keep-alive (prevents Render free tier from spinning down) ──────────────────
+def keep_alive():
+    while True:
+        time.sleep(10 * 60)          
+        try:
+            urllib.request.urlopen("https://fooddeliveryprediction.onrender.com")
+            print("Keep alive ping sent")
+        except:
+            pass
+
+thread = threading.Thread(target=keep_alive, daemon=True)
+thread.start()
+# ──────────────────────────────────────────────────────────────────────────────
+
 
 class OrderInput(BaseModel):
     distance_km: float
@@ -35,10 +55,10 @@ def health():
 
 @app.post("/predict")
 def predict(order: OrderInput):
-    w = WEATHER_MAP[order.weather]
-    t = TRAFFIC_MAP[order.traffic_level]
+    w   = WEATHER_MAP[order.weather]
+    t   = TRAFFIC_MAP[order.traffic_level]
     tod = TIME_MAP[order.time_of_day]
-    v = VEHICLE_MAP[order.vehicle_type]
+    v   = VEHICLE_MAP[order.vehicle_type]
 
     row = {
         "Distance_km":          order.distance_km,

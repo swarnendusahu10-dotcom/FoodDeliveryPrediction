@@ -26,14 +26,20 @@ export default function PredictForm() {
     setResult(null);
     try {
       const payload = {
-  ...form,
-  distance_km:          parseFloat(parseFloat(form.distance_km).toFixed(2)),
-  preparation_time_min: parseInt(form.preparation_time_min),
-};
-      const res = await axios.post(`${API_URL}/predict`, payload);
+        ...form,
+        distance_km:          parseFloat(parseFloat(form.distance_km).toFixed(2)),
+        preparation_time_min: parseInt(form.preparation_time_min),
+      };
+      const res = await axios.post(`${API_URL}/predict`, payload, {
+        timeout: 60000  // wait 60 seconds instead of default 5 seconds
+      });
       setResult(res.data);
     } catch (err) {
-      setError("Prediction failed. Check your inputs.");
+      if (err.code === "ECONNABORTED") {
+        setError("Server is waking up, please try again in 30 seconds!");
+      } else {
+        setError("Prediction failed. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -45,17 +51,17 @@ export default function PredictForm() {
 
       <form onSubmit={handleSubmit}>
         <label>Distance (km)</label>
-        <input 
-  type="number" 
-  name="distance_km" 
-  step="0.1"      
-  min="0.1"       
-  max="20"        
-  required
-  value={form.distance_km} 
-  onChange={handleChange} 
-  style={inputStyle}
-/>
+        <input
+          type="number"
+          name="distance_km"
+          step="0.1"
+          min="0.1"
+          max="20"
+          required
+          value={form.distance_km}
+          onChange={handleChange}
+          style={inputStyle}
+        />
 
         <label>Weather</label>
         <select name="weather" value={form.weather} onChange={handleChange} style={inputStyle}>
@@ -82,8 +88,8 @@ export default function PredictForm() {
           value={form.preparation_time_min} onChange={handleChange} style={inputStyle}/>
 
         <button type="submit" disabled={loading} style={btnStyle}>
-          {loading ? "Predicting..." : "Predict Delivery Time"}
-        </button>
+  {loading ? "⏳ Please wait, server waking up..." : "Predict Delivery Time"}
+</button>
       </form>
 
       {result && (
