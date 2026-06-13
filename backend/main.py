@@ -4,11 +4,10 @@ from pydantic import BaseModel
 import joblib, json, numpy as np, pandas as pd
 
 app = FastAPI()
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
-    allow_credentials=True,
+    allow_origins=["*"],  # temporarily allow everything to test
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
