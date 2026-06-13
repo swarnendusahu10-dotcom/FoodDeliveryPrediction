@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "https://fooddeliveryprediction.onrender.com";
 
 export default function PredictForm() {
   const [form, setForm] = useState({
