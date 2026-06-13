@@ -26,10 +26,10 @@ export default function PredictForm() {
     setResult(null);
     try {
       const payload = {
-        ...form,
-        distance_km:          parseFloat(form.distance_km),
-        preparation_time_min: parseInt(form.preparation_time_min),
-      };
+  ...form,
+  distance_km:          parseFloat(parseFloat(form.distance_km).toFixed(2)),
+  preparation_time_min: parseInt(form.preparation_time_min),
+};
       const res = await axios.post(`${API_URL}/predict`, payload);
       setResult(res.data);
     } catch (err) {
@@ -45,8 +45,17 @@ export default function PredictForm() {
 
       <form onSubmit={handleSubmit}>
         <label>Distance (km)</label>
-        <input type="number" name="distance_km" step="0.1" required
-          value={form.distance_km} onChange={handleChange} style={inputStyle}/>
+        <input 
+  type="number" 
+  name="distance_km" 
+  step="0.1"      
+  min="0.1"       
+  max="20"        
+  required
+  value={form.distance_km} 
+  onChange={handleChange} 
+  style={inputStyle}
+/>
 
         <label>Weather</label>
         <select name="weather" value={form.weather} onChange={handleChange} style={inputStyle}>

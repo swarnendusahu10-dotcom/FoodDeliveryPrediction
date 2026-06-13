@@ -4,7 +4,6 @@ A full-stack machine learning application that predicts food delivery time based
 
 Live Demo: your-app.vercel.app  |  API Docs: your-backend.onrender.com/docs
 
-
 📊 Model Performance
 
 MetricScoreR² Score0.772RMSE10.12 minMAE7.15 minAlgorithmXGBoost RegressorTraining Data1,000 orders
